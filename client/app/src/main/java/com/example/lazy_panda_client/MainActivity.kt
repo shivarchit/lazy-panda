@@ -8,8 +8,11 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import java.io.BufferedReader
+import java.io.BufferedWriter
 import java.io.InputStreamReader
+import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -30,14 +33,30 @@ class MainActivity : AppCompatActivity() {
     }
 
     private suspend fun httpRequesterOnClickHandler(buttonText: String) {
-        // Replace the URL with your actual endpoint
-        val url = URL("http://localhost:3010/keyboard-event")
+        // Create a sample JSON data
+        val jsonData = JSONObject()
+        jsonData.put("key", buttonText)
+
+        val url = URL("http://192.168.1.6:3010/keyboard-event")
 
         try {
-            // Use withContext to switch to the IO dispatcher for network operations
             val response = withContext(Dispatchers.IO) {
                 val urlConnection = url.openConnection() as HttpURLConnection
-                urlConnection.requestMethod = "GET"
+                urlConnection.requestMethod = "POST"
+
+                // Set content type to application/json
+                urlConnection.setRequestProperty("Content-Type", "application/json; utf-8")
+
+                // Enable output stream for writing data
+                urlConnection.doOutput = true
+
+                // Write the JSON data to the output stream
+                val outputStream = urlConnection.outputStream
+                val writer = BufferedWriter(OutputStreamWriter(outputStream, "UTF-8"))
+                writer.write(jsonData.toString())
+                writer.flush()
+                writer.close()
+                outputStream.close()
 
                 // Get the response
                 val reader = BufferedReader(InputStreamReader(urlConnection.inputStream))
@@ -54,7 +73,6 @@ class MainActivity : AppCompatActivity() {
                 response.toString()
             }
 
-            // Process the response on the UI thread
             withContext(Dispatchers.Main) {
                 // Update UI with the response and button text
                 val updatedText = "$buttonText Key Pressed, sending request\nResponse: $response"
@@ -62,12 +80,12 @@ class MainActivity : AppCompatActivity() {
             }
 
         } catch (e: Exception) {
-            // Handle the exception on the UI thread
             withContext(Dispatchers.Main) {
-                // Show error message or handle accordingly
                 println(e)
                 Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
+
+
 }
