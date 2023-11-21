@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
         val jsonData = JSONObject()
         jsonData.put("key", buttonText)
 
-        val url = URL("http://192.168.1.6:3010/keyboard-event")
+        val url = URL("http://192.168.1.6:3010/api/keyboard-event")
 
         try {
             val response = withContext(Dispatchers.IO) {

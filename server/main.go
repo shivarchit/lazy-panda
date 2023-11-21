@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"os/exec"
 	"runtime"
 
+	"github.com/getlantern/systray"
 	"github.com/gorilla/mux"
 )
 
@@ -76,16 +78,50 @@ func DefaultHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResponse)
 }
 
+func onReady() {
+	// Add a simple menu item
+	systray.SetTitle("Lazy Panda")
+	systray.SetTooltip("Lazy Panda Server")
+	mQuit := systray.AddMenuItem("Quit Lazy Panda Server", "Quit the application")
+
+	// Set the icon (assuming icon.ico is in the same directory as main.go)
+	iconPath := "panda.ico"
+	iconBytes, err := os.ReadFile(iconPath)
+	if err != nil {
+		fmt.Println("Error reading icon file:", err)
+		return
+	}
+
+	// Handle menu item clicks
+	go func() {
+		for {
+			select {
+			case <-mQuit.ClickedCh:
+				systray.Quit()
+				os.Exit(0)
+				return
+			}
+		}
+	}()
+
+	systray.SetIcon(iconBytes)
+}
+
+func onExit() {
+	// Cleanup code when the systray is closed
+}
+
 func main() {
 	router := mux.NewRouter()
 
 	// Endpoint to return JSON on the default path
-	router.HandleFunc("/", DefaultHandler).Methods("GET")
+	router.HandleFunc("/api", DefaultHandler).Methods("GET")
 
 	// Endpoint to receive keyboard events
-	router.HandleFunc("/keyboard-event", KeyboardEventHandler).Methods("POST")
+	router.HandleFunc("/api/keyboard-event", KeyboardEventHandler).Methods("POST")
 
 	port := "3010"
 	fmt.Printf("Server is running on port %s\n", port)
+	systray.Run(onReady, onExit)
 	http.ListenAndServe(":"+port, router)
 }
