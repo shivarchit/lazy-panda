@@ -6,7 +6,9 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"os/signal"
 	"runtime"
+	"syscall"
 
 	"github.com/getlantern/systray"
 	"github.com/gorilla/mux"
@@ -78,26 +80,26 @@ func DefaultHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResponse)
 }
 
+var systrayQuit chan struct{}
+
 func onReady() {
-	// Add a simple menu item
 	systray.SetTitle("Lazy Panda")
 	systray.SetTooltip("Lazy Panda Server")
 	mQuit := systray.AddMenuItem("Quit Lazy Panda Server", "Quit the application")
 
-	// Set the icon (assuming icon.ico is in the same directory as main.go)
 	iconPath := "panda.ico"
 	iconBytes, err := os.ReadFile(iconPath)
 	if err != nil {
-		fmt.Println("Error reading icon file:", err)
+		fmt.Printf("Error reading icon file: %v\n", err)
 		return
 	}
 
-	// Handle menu item clicks
 	go func() {
 		for {
 			select {
 			case <-mQuit.ClickedCh:
 				systray.Quit()
+				close(systrayQuit)
 				os.Exit(0)
 				return
 			}
@@ -108,20 +110,46 @@ func onReady() {
 }
 
 func onExit() {
-	// Cleanup code when the systray is closed
+	fmt.Println("Exit cleanup complete.")
+}
+
+func handleSignals() {
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
+
+	// Wait for a signal to be received
+	select {
+	case <-sigCh:
+		// Handle termination signals
+		fmt.Println("Received termination signal. Cleaning up...")
+		systray.Quit()
+		close(systrayQuit)
+		os.Exit(0)
+	}
 }
 
 func main() {
 	router := mux.NewRouter()
 
-	// Endpoint to return JSON on the default path
 	router.HandleFunc("/api", DefaultHandler).Methods("GET")
-
-	// Endpoint to receive keyboard events
 	router.HandleFunc("/api/keyboard-event", KeyboardEventHandler).Methods("POST")
 
 	port := "3010"
-	fmt.Printf("Server is running on port %s\n", port)
-	systray.Run(onReady, onExit)
-	http.ListenAndServe(":"+port, router)
+	ipAddress := "192.168.1.6"
+	addr := ipAddress + ":" + port
+
+	fmt.Printf("Server is running on %s\n", addr)
+
+	systrayQuit = make(chan struct{})
+
+	go systray.Run(onReady, onExit)
+	go handleSignals()
+
+	err := http.ListenAndServe(addr, router)
+	if err != nil {
+		fmt.Printf("Error starting the server: %v\n", err)
+		os.Exit(1)
+	}
+
+	<-systrayQuit // Wait for systray to be closed before exiting
 }
