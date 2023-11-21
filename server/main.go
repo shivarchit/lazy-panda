@@ -58,7 +58,7 @@ type BasicLogData struct {
 func DefaultHandler(w http.ResponseWriter, r *http.Request) {
 	// Create an instance of your custom data structure
 	data := BasicLogData{
-		Message: "3010 Port LazyPanda running!",
+		Message: "3010 Port Lazy Panda running!",
 	}
 
 	// Convert the data to JSON
