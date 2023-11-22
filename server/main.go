@@ -51,7 +51,16 @@ func KeyboardEventHandler(w http.ResponseWriter, r *http.Request) {
 	SimulateKeyPress(event.Key)
 
 	fmt.Printf("Received key event: %s\n", event.Key)
+	response := struct{ IsActionSuccess bool }{true}
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		http.Error(w, "Failed to create JSON response", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	w.Write(jsonResponse)
 }
 
 type BasicLogData struct {
