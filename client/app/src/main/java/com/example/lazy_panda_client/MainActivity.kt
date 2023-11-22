@@ -18,7 +18,7 @@ import java.net.URL
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var button: Button
+    private lateinit var button: Button;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,9 +35,9 @@ class MainActivity : AppCompatActivity() {
     private suspend fun httpRequesterOnClickHandler(buttonText: String) {
         // Create a sample JSON data
         val jsonData = JSONObject()
-        jsonData.put("key", buttonText)
+        jsonData.put("key", buttonText.toString().lowercase())
 
-        val url = URL("http://192.168.1.6:3010/api/keyboard-event")
+        val url = URL("http://10.0.2.2:3010/keyboard-event")
 
         try {
             val response = withContext(Dispatchers.IO) {
@@ -75,8 +75,7 @@ class MainActivity : AppCompatActivity() {
 
             withContext(Dispatchers.Main) {
                 // Update UI with the response and button text
-                val updatedText = "$buttonText Key Pressed, sending request\nResponse: $response"
-                button.text = updatedText
+                Toast.makeText(this@MainActivity, "Successful", Toast.LENGTH_LONG).show()
             }
 
         } catch (e: Exception) {
