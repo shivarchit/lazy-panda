@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.lazy_panda_client"
+    namespace = "com.shivarchit.lazy_panda_client"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.lazy_panda_client"
+        applicationId = "com.shivarchit.lazy_panda_client"
         minSdk = 24
         targetSdk = 33
         versionCode = 1

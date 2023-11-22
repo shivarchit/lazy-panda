@@ -1,4 +1,4 @@
-package com.example.lazy_panda_client
+package com.shivarchit.lazy_panda_client
 
 import org.junit.Test
 
