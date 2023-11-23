@@ -9,7 +9,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtKey = []byte("my_secret_key")
+var jwtKey = []byte("7e9c498c64848e0c82d1e0077fdae3b7e295c91800b8efc3b684259b074ee5a5d69b2926780f6e892b0a0c941f236dd88157704bd04b6fc1adebb74185af19a6")
 
 var users = map[string]string{
 	"shiv": "P@ssw0rd",
@@ -151,7 +151,7 @@ func Refresh(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	// (END) The code uptil this point is the same as the first part of the `Welcome` route
+	// (END) The code up till this point is the same as the first part of the `Welcome` route
 
 	// We ensure that a new token is not issued until enough time has elapsed
 	// In this case, a new token will only be issued if the old token is within
@@ -162,7 +162,7 @@ func Refresh(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Now, create a new token for the current use, with a renewed expiration time
-	expirationTime := time.Now().Add(5 * time.Minute)
+	expirationTime := time.Now().Add(5 * time.Day)
 	claims.ExpiresAt = jwt.NewNumericDate(expirationTime)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString(jwtKey)
