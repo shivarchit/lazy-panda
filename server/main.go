@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -11,10 +13,15 @@ import (
 	"syscall"
 
 	sysTray "github.com/getlantern/systray"
-	"github.com/gorilla/mux"		
-	localTunnel "github.com/jonasfj/go-localtunnel"
+	"github.com/gorilla/mux"
+	"github.com/skratchdot/open-golang/open"
+	"golang.ngrok.com/ngrok"
+	"golang.ngrok.com/ngrok/config"
 )
+
 var sysTrayQuit chan struct{}
+var keyPressChannel chan string
+
 // KeyboardEvent represents the structure of the JSON request body
 type KeyboardEvent struct {
 	Key string `json:"key"`
@@ -24,15 +31,27 @@ type KeyboardEvent struct {
 func SimulateKeyPress(key string) {
 	switch runtime.GOOS {
 	case "windows":
-		// Simulate key press on Windows
-		exec.Command("cmd", "/c", "echo "+key+" | clip").Run()
-		exec.Command("cmd", "/c", "echo ^v | clip").Run()
+		cmd := exec.Command("cmd", "/c", "echo "+key+"| clip")
+		if err := cmd.Run(); err != nil {
+			log.Println("Error running command:", err)
+		}
+
+		cmd = exec.Command("cmd", "/c", "echo ^v | clip")
+		if err := cmd.Run(); err != nil {
+			log.Println("Error running command:", err)
+		}
 	case "darwin":
-		// Simulate key press on macOS
-		exec.Command("bash", "-c", "osascript -e 'tell application \"System Events\" to keystroke \""+key+"\"'").Run()
+		cmd := exec.Command("bash", "-c", "osascript -e 'tell application \"System Events\" to keystroke \""+key+"\"'")
+		if err := cmd.Run(); err != nil {
+			log.Println("Error running command:", err)
+		}
 	case "linux":
-		// Simulate key press on Linux
-		exec.Command("bash", "-c", "xdotool type "+key).Run()
+		cmd := exec.Command("bash", "-c", "xdotool type "+key)
+		if err := cmd.Run(); err != nil {
+			log.Println("Error running command:", err)
+		}
+	default:
+		log.Println("Unsupported operating system:", runtime.GOOS)
 	}
 }
 
@@ -40,16 +59,15 @@ func SimulateKeyPress(key string) {
 func KeyboardEventHandler(w http.ResponseWriter, r *http.Request) {
 	var event KeyboardEvent
 
-	// Decode the JSON request body
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&event)
 	if err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
-
-	// Simulate key press based on the received event
-	SimulateKeyPress(event.Key)
+	fmt.Printf("1")
+	keyPressChannel <- event.Key
+	fmt.Printf("2")
 
 	fmt.Printf("Received key event: %s\n", event.Key)
 	response := struct{ IsActionSuccess bool }{true}
@@ -70,26 +88,20 @@ type BasicLogData struct {
 
 // DefaultHandler handles GET requests on the default path ("/")
 func DefaultHandler(w http.ResponseWriter, r *http.Request) {
-	// Create an instance of your custom data structure
 	data := BasicLogData{
 		Message: "3010 Port Lazy Panda running!",
 	}
 
-	// Convert the data to JSON
 	jsonResponse, err := json.Marshal(data)
 	if err != nil {
 		http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
 		return
 	}
 
-	// Set the Content-Type header to application/json
 	w.Header().Set("Content-Type", "application/json")
-
-	// Write the JSON response to the client
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonResponse)
 }
-
 
 func onReady() {
 	sysTray.SetTitle("Lazy Panda")
@@ -126,10 +138,8 @@ func handleSignals() {
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
 
-	// Wait for a signal to be received
 	select {
 	case <-sigCh:
-		// Handle termination signals
 		fmt.Println("Received termination signal. Cleaning up...")
 		sysTray.Quit()
 		close(sysTrayQuit)
@@ -138,21 +148,25 @@ func handleSignals() {
 }
 
 func main() {
-	// Setup localTunnel
-	listener, err := localTunnel.Listen(localTunnel.Options{})
+	keyPressChannel = make(chan string)
+	sysTrayQuit = make(chan struct{})
+
+	os.Setenv("NGROK_AUTHTOKEN", "")
+	ctx := context.Background()
+	listener, err := ngrok.Listen(ctx,
+		config.HTTPEndpoint(
+			config.WithDomain("starfish-hopeful-spaniel.ngrok-free.app"),
+		),
+		ngrok.WithAuthtokenFromEnv(),
+	)
 	if err != nil {
-		log.Fatal("Error setting up localTunnel:", err)
+		log.Fatal("Error setting up ngrok:", err)
 	}
 
-	// Create HTTP server
 	router := mux.NewRouter()
 
-	router.HandleFunc("/", DefaultHandler).Methods("GET")	
+	router.HandleFunc("/", DefaultHandler).Methods("GET")
 	router.HandleFunc("/api/keyboard-event", KeyboardEventHandler).Methods("POST")
-	router.HandleFunc("/api/signIn", SignIn).Methods("POST")
-	router.HandleFunc("/api/welcome", Welcome).Methods("GET")
-	router.HandleFunc("/api/refresh", Refresh).Methods("POST")
-	router.HandleFunc("/api/logout", Logout).Methods("POST")
 
 	port := "3010"
 	ipAddress := "localhost"
@@ -160,12 +174,19 @@ func main() {
 
 	fmt.Printf("Server is running on %s\n", addr)
 
-	sysTrayQuit = make(chan struct{})
-
 	go sysTray.Run(onReady, onExit)
 	go handleSignals()
 
-	// Start serving requests
+	// Start the goroutine to handle key press requests
+	go func() {
+		for {
+			select {
+			case key := <-keyPressChannel:
+				SimulateKeyPress(key)
+			}
+		}
+	}()
+
 	go func() {
 		err := http.Serve(listener, router)
 		if err != nil {
@@ -173,9 +194,8 @@ func main() {
 		}
 	}()
 
-	// Open the localTunnel in the default browser
-	tunnelURL := fmt.Sprintf("http://%s", listener.Addr())
-	open.Run(tunnelURL)
+	// Open the ngrok URL in the default browser
+	open.Run(listener.URL())
 
-	<-sysTrayQuit // Wait for sysTray to be closed before exiting
+	<-sysTrayQuit
 }
