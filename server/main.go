@@ -10,10 +10,11 @@ import (
 	"runtime"
 	"syscall"
 
-	"github.com/getlantern/systray"
-	"github.com/gorilla/mux"
+	sysTray "github.com/getlantern/systray"
+	"github.com/gorilla/mux"		
+	localTunnel "github.com/jonasfj/go-localtunnel"
 )
-
+var sysTrayQuit chan struct{}
 // KeyboardEvent represents the structure of the JSON request body
 type KeyboardEvent struct {
 	Key string `json:"key"`
@@ -89,12 +90,11 @@ func DefaultHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResponse)
 }
 
-var systrayQuit chan struct{}
 
 func onReady() {
-	systray.SetTitle("Lazy Panda")
-	systray.SetTooltip("Lazy Panda Server")
-	mQuit := systray.AddMenuItem("Quit Lazy Panda Server", "Quit the application")
+	sysTray.SetTitle("Lazy Panda")
+	sysTray.SetTooltip("Lazy Panda Server")
+	mQuit := sysTray.AddMenuItem("Quit Lazy Panda Server", "Quit the application")
 
 	iconPath := "panda.ico"
 	iconBytes, err := os.ReadFile(iconPath)
@@ -107,15 +107,15 @@ func onReady() {
 		for {
 			select {
 			case <-mQuit.ClickedCh:
-				systray.Quit()
-				close(systrayQuit)
+				sysTray.Quit()
+				close(sysTrayQuit)
 				os.Exit(0)
 				return
 			}
 		}
 	}()
 
-	systray.SetIcon(iconBytes)
+	sysTray.SetIcon(iconBytes)
 }
 
 func onExit() {
@@ -131,34 +131,51 @@ func handleSignals() {
 	case <-sigCh:
 		// Handle termination signals
 		fmt.Println("Received termination signal. Cleaning up...")
-		systray.Quit()
-		close(systrayQuit)
+		sysTray.Quit()
+		close(sysTrayQuit)
 		os.Exit(0)
 	}
 }
 
 func main() {
+	// Setup localTunnel
+	listener, err := localTunnel.Listen(localTunnel.Options{})
+	if err != nil {
+		log.Fatal("Error setting up localTunnel:", err)
+	}
+
+	// Create HTTP server
 	router := mux.NewRouter()
 
-	router.HandleFunc("/api", DefaultHandler).Methods("GET")
+	router.HandleFunc("/", DefaultHandler).Methods("GET")	
 	router.HandleFunc("/api/keyboard-event", KeyboardEventHandler).Methods("POST")
+	router.HandleFunc("/api/signIn", SignIn).Methods("POST")
+	router.HandleFunc("/api/welcome", Welcome).Methods("GET")
+	router.HandleFunc("/api/refresh", Refresh).Methods("POST")
+	router.HandleFunc("/api/logout", Logout).Methods("POST")
 
 	port := "3010"
-	ipAddress := "192.168.1.6"
+	ipAddress := "localhost"
 	addr := ipAddress + ":" + port
 
 	fmt.Printf("Server is running on %s\n", addr)
 
-	systrayQuit = make(chan struct{})
+	sysTrayQuit = make(chan struct{})
 
-	go systray.Run(onReady, onExit)
+	go sysTray.Run(onReady, onExit)
 	go handleSignals()
 
-	err := http.ListenAndServe(addr, router)
-	if err != nil {
-		fmt.Printf("Error starting the server: %v\n", err)
-		os.Exit(1)
-	}
+	// Start serving requests
+	go func() {
+		err := http.Serve(listener, router)
+		if err != nil {
+			log.Fatal("Error serving requests:", err)
+		}
+	}()
 
-	<-systrayQuit // Wait for systray to be closed before exiting
+	// Open the localTunnel in the default browser
+	tunnelURL := fmt.Sprintf("http://%s", listener.Addr())
+	open.Run(tunnelURL)
+
+	<-sysTrayQuit // Wait for sysTray to be closed before exiting
 }

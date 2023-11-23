@@ -12,7 +12,7 @@ import (
 var jwtKey = []byte("my_secret_key")
 
 var users = map[string]string{
-	"user1": "password1",
+	"shiv": "P@ssw0rd",
 	"user2": "password2",
 }
 
@@ -27,7 +27,7 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func Signin(w http.ResponseWriter, r *http.Request) {
+func SignIn(w http.ResponseWriter, r *http.Request) {
 	var creds Credentials
 	// Get the JSON body and decode into credentials
 	err := json.NewDecoder(r.Body).Decode(&creds)
