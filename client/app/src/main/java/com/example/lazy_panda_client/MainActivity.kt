@@ -1,4 +1,4 @@
-package com.shivarchit.lazy_panda_client
+package com.example.lazy_panda_client
 
 import android.os.Bundle
 import android.widget.Button
@@ -15,7 +15,6 @@ import kotlinx.coroutines.withTimeout
 //import kotlinx.serialization.decodeFromString
 //import kotlinx.serialization.json.Json
 import org.json.JSONObject
-import org.w3c.dom.Text
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.InputStreamReader
@@ -49,7 +48,7 @@ class MainActivity : AppCompatActivity() {
         val jsonData = JSONObject()
         jsonData.put("key", buttonText.toString().lowercase())
 
-        val url = URL("http://10.0.2.2:3010/keyboard-event")
+        val url = URL("https://starfish-hopeful-spaniel.ngrok-free.app/api/keyboard-event")
 
         try {
             // Use withTimeout to set a timeout for the HTTP request

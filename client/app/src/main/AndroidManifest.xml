@@ -14,7 +14,7 @@
         android:theme="@style/Theme.Lazypandaclient"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name="com.example.lazy_panda_client.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
