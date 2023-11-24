@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"os/signal"
 	"runtime"
 	"syscall"
@@ -17,6 +16,8 @@ import (
 	"github.com/skratchdot/open-golang/open"
 	"golang.ngrok.com/ngrok"
 	"golang.ngrok.com/ngrok/config"
+
+	robotGo "github.com/go-vgo/robotgo"
 )
 
 var sysTrayQuit chan struct{}
@@ -31,25 +32,30 @@ type KeyboardEvent struct {
 func SimulateKeyPress(key string) {
 	switch runtime.GOOS {
 	case "windows":
-		cmd := exec.Command("cmd", "/c", "echo "+key+"| clip")
-		if err := cmd.Run(); err != nil {
-			log.Println("Error running command:", err)
-		}
 
-		cmd = exec.Command("cmd", "/c", "echo ^v | clip")
-		if err := cmd.Run(); err != nil {
-			log.Println("Error running command:", err)
-		}
+		log.Println(key)
+		robotGo.Sleep(1)
+		robotGo.KeyTap("key")
+		robotGo.Sleep(2)
+		// cmd := exec.Command("cmd", "/c", "echo "+key+"| clip")
+		// if err := cmd.Run(); err != nil {
+		// 	log.Println("Error running command:", err)
+		// }
+
+		// cmd = exec.Command("cmd", "/c", "echo ^v | clip")
+		// if err := cmd.Run(); err != nil {
+		// 	log.Println("Error running command:", err)
+		// }
 	case "darwin":
-		cmd := exec.Command("bash", "-c", "osascript -e 'tell application \"System Events\" to keystroke \""+key+"\"'")
-		if err := cmd.Run(); err != nil {
-			log.Println("Error running command:", err)
-		}
+		// cmd := exec.Command("bash", "-c", "osascript -e 'tell application \"System Events\" to keystroke \""+key+"\"'")
+		// if err := cmd.Run(); err != nil {
+		// 	log.Println("Error running command:", err)
+		// }
 	case "linux":
-		cmd := exec.Command("bash", "-c", "xdotool type "+key)
-		if err := cmd.Run(); err != nil {
-			log.Println("Error running command:", err)
-		}
+		// cmd := exec.Command("bash", "-c", "xdotool type "+key)
+		// if err := cmd.Run(); err != nil {
+		// 	log.Println("Error running command:", err)
+		// }
 	default:
 		log.Println("Unsupported operating system:", runtime.GOOS)
 	}
