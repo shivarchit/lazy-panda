@@ -30,6 +30,7 @@ type KeyboardEvent struct {
 
 // SimulateKeyPress simulates a key press using the appropriate command based on the operating system
 func SimulateKeyPress(key string) {
+
 	switch runtime.GOOS {
 	case "windows":
 
@@ -52,6 +53,10 @@ func SimulateKeyPress(key string) {
 		// 	log.Println("Error running command:", err)
 		// }
 	case "linux":
+		log.Println(key)
+		robotGo.Sleep(1)
+		robotGo.KeyTap("space")
+		robotGo.Sleep(2)
 		// cmd := exec.Command("bash", "-c", "xdotool type "+key)
 		// if err := cmd.Run(); err != nil {
 		// 	log.Println("Error running command:", err)
@@ -71,9 +76,7 @@ func KeyboardEventHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
-	fmt.Printf("1")
 	keyPressChannel <- event.Key
-	fmt.Printf("2")
 
 	fmt.Printf("Received key event: %s\n", event.Key)
 	response := struct{ IsActionSuccess bool }{true}
