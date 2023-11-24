@@ -11,6 +11,7 @@ import (
 	sysTray "github.com/getlantern/systray"
 )
 
+var sysTrayQuit chan struct{}
 var keyPressChannel chan string
 
 func onReady() {
@@ -40,36 +41,12 @@ func onReady() {
 	sysTray.SetIcon(iconBytes)
 }
 
-// KeyboardEventHandler handles incoming keyboard events
-func KeyboardEventHandler(w http.ResponseWriter, r *http.Request) {
-	var event KeyboardEvent
-
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&event)
-	if err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
-		return
-	}
-	keyPressChannel <- event.Key
-
-	fmt.Printf("Received key event: %s\n", event.Key)
-	response := struct{ IsActionSuccess bool }{true}
-	jsonResponse, err := json.Marshal(response)
-	if err != nil {
-		http.Error(w, "Failed to create JSON response", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(jsonResponse)
-}
-
 func onExit() {
 	fmt.Println("Exit cleanup complete.")
 }
 
 func handleSignals() {
+	go sysTray.Run(onReady, onExit)
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
 

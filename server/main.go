@@ -2,44 +2,20 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 
-	sysTray "github.com/getlantern/systray"
 	"github.com/gorilla/mux"
 	"golang.ngrok.com/ngrok"
 	"golang.ngrok.com/ngrok/config"
 )
 
-var sysTrayQuit chan struct{}
-
-type BasicLogData struct {
-	Message string `json:"message"`
-}
-
-// DefaultHandler handles GET requests on the default path ("/")
-func DefaultHandler(w http.ResponseWriter, r *http.Request) {
-	data := BasicLogData{
-		Message: "3010 Port Lazy Panda running!",
-	}
-
-	jsonResponse, err := json.Marshal(data)
-	if err != nil {
-		http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(jsonResponse)
-}
+var keyPressChannel = make(chan string)
 
 func main() {
-	keyPressChannel = make(chan string)
-	sysTrayQuit = make(chan struct{})
+	// sysTrayQuit = make(chan struct{})
 
 	os.Setenv("NGROK_AUTHTOKEN", "2YXaL3cvlhjHmnAkimWzhdLfVw1_7XLqj3hHw68EYLfjpqFqf")
 	ctx := context.Background()
@@ -66,8 +42,7 @@ func main() {
 
 	fmt.Printf("Server is running on %s\n", addr)
 
-	go sysTray.Run(onReady, onExit)
-	go handleSignals()
+	// go handleSignals()
 
 	// Start the goroutine to handle key press requests
 	go func() {
@@ -88,5 +63,6 @@ func main() {
 
 	// Open the ngrok URL in the default browser
 	log.Println("Default Serving URL: ", listener.URL())
-	<-sysTrayQuit
+	// <-sysTrayQuit
+	select {}
 }

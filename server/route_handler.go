@@ -8,6 +8,10 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+type BasicLogData struct {
+	Message string `json:"message"`
+}
+
 var jwtSecret = []byte("7e9c498c64848e0c82d1e0077fdae3b7e295c91800b8efc3b684259b074ee5a5d69b2926780f6e892b0a0c941f236dd88157704bd04b6fc1adebb74185af19a6")
 var defaultAllowedUsers = map[string]string{
 	"shiv": "P@ssw0rd",
@@ -72,9 +76,26 @@ func generateToken(userId string) (string, error) {
 	return tokenString, nil
 }
 
+// DefaultHandler handles GET requests on the default path ("/")
+func DefaultHandler(w http.ResponseWriter, r *http.Request) {
+	data := BasicLogData{
+		Message: "Lazy Panda running on port 3010!",
+	}
+
+	jsonResponse, err := json.Marshal(data)
+	if err != nil {
+		http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonResponse)
+}
+
 func authenticateMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/api/login" {
+		if r.URL.Path == "/api/login" || r.URL.Path == "/" {
 			next.ServeHTTP(w, r)
 			return
 		}
