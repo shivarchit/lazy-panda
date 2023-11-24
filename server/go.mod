@@ -7,7 +7,6 @@ require (
 	github.com/go-vgo/robotgo v0.110.0
 	github.com/golang-jwt/jwt/v5 v5.1.0
 	github.com/gorilla/mux v1.8.1
-	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966
 	golang.ngrok.com/ngrok v1.5.1
 )
 
