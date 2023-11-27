@@ -1,0 +1,12 @@
+{
+    "ngrok": {
+        "auth_token": "",
+        "domain": ""
+    },
+    "jwt_secret": "",
+    "server": {
+        "port": "3010",
+        "ipAddress": "localhost"
+    },
+    "sysTrayIconPath": "panda.ico"
+}

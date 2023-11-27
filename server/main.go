@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/gorilla/mux"
 	"golang.ngrok.com/ngrok"
@@ -14,16 +13,23 @@ import (
 
 var keyPressChannel = make(chan string)
 
-func main() {
-	// sysTrayQuit = make(chan struct{})
+var globalConfig Config
 
-	os.Setenv("NGROK_AUTHTOKEN", "2YXaL3cvlhjHmnAkimWzhdLfVw1_7XLqj3hHw68EYLfjpqFqf")
+func main() {
+	err := readConfig("./config.json")
+	if err != nil {
+		fmt.Println("Error reading configuration:", err)
+		return
+	}
+
+	sysTrayQuit = make(chan struct{})
+
 	ctx := context.Background()
 	listener, err := ngrok.Listen(ctx,
 		config.HTTPEndpoint(
-			config.WithDomain("starfish-hopeful-spaniel.ngrok-free.app"),
+			config.WithDomain(globalConfig.Ngrok.Domain),
 		),
-		ngrok.WithAuthtokenFromEnv(),
+		ngrok.WithAuthtoken(globalConfig.Ngrok.AuthToken),
 	)
 	if err != nil {
 		log.Fatal("Error setting up ngrok:", err)
@@ -36,13 +42,13 @@ func main() {
 	router.HandleFunc("/api/keyboard-event", KeyboardEventHandler).Methods("POST")
 	router.HandleFunc("/api/login", LoginHandler).Methods("POST")
 
-	port := "3010"
-	ipAddress := "localhost"
+	port := globalConfig.Server.Port
+	ipAddress := globalConfig.Server.IPAddress
 	addr := ipAddress + ":" + port
 
 	fmt.Printf("Server is running on %s\n", addr)
 
-	// go handleSignals()
+	go handleSignals()
 
 	// Start the goroutine to handle key press requests
 	go func() {
@@ -63,6 +69,5 @@ func main() {
 
 	// Open the ngrok URL in the default browser
 	log.Println("Default Serving URL: ", listener.URL())
-	// <-sysTrayQuit
-	select {}
+	<-sysTrayQuit
 }

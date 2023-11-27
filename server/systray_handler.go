@@ -1,9 +1,7 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -12,14 +10,13 @@ import (
 )
 
 var sysTrayQuit chan struct{}
-var keyPressChannel chan string
 
 func onReady() {
 	sysTray.SetTitle("Lazy Panda")
 	sysTray.SetTooltip("Lazy Panda Server")
 	mQuit := sysTray.AddMenuItem("Quit Lazy Panda Server", "Quit the application")
 
-	iconPath := "panda.ico"
+	iconPath := globalConfig.SysTrayIconPath
 	iconBytes, err := os.ReadFile(iconPath)
 	if err != nil {
 		fmt.Printf("Error reading icon file: %v\n", err)

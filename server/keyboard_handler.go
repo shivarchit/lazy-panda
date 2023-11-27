@@ -34,9 +34,7 @@ func KeyboardEventHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func SimulateKeyPress(key string) {
-	log.Println("Running for architecture: ", runtime.GOOS, "\n")
-	log.Println("Pressing key: ", key, "\n")
+	log.Println("Running for architecture: ", runtime.GOOS, ",pressing key: ", key)
 	robotGo.Sleep(1)
 	robotGo.KeyTap(key)
-	robotGo.Sleep(1)
 }

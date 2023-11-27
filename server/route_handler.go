@@ -12,7 +12,7 @@ type BasicLogData struct {
 	Message string `json:"message"`
 }
 
-var jwtSecret = []byte("7e9c498c64848e0c82d1e0077fdae3b7e295c91800b8efc3b684259b074ee5a5d69b2926780f6e892b0a0c941f236dd88157704bd04b6fc1adebb74185af19a6")
+var jwtSecret = []byte(globalConfig.JwtSecret)
 var defaultAllowedUsers = map[string]string{
 	"shiv": "P@ssw0rd",
 }
