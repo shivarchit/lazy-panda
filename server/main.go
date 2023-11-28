@@ -14,6 +14,7 @@ import (
 
 var keyPressChannel = make(chan string)
 
+
 var globalConfig Config
 
 func main() {
@@ -23,7 +24,7 @@ func main() {
 		return
 	}
 
-	sysTrayQuit = make(chan struct{})
+	// sysTrayQuit = make(chan struct{})
 
 	ctx := context.Background()
 	listener, err := ngrok.Listen(ctx,
@@ -40,6 +41,7 @@ func main() {
 	router.Use(authenticateMiddleware)
 
 	router.HandleFunc("/", DefaultHandler).Methods("GET")
+	router.HandleFunc("/ws", wsHandler)
 	router.HandleFunc("/api/keyboard-event", KeyboardEventHandler).Methods("POST")
 	router.HandleFunc("/api/login", LoginHandler).Methods("POST")
 
@@ -49,7 +51,7 @@ func main() {
 
 	fmt.Printf("Server is running on %s\n", addr)
 
-	go handleSignals()
+	// go handleSignals()
 
 	// Start the goroutine to handle key press requests
 	go func() {
@@ -70,5 +72,6 @@ func main() {
 
 	// Open the ngrok URL in the default browser
 	log.Println("Default Serving URL: ", listener.URL())
-	<-sysTrayQuit
+	select {}
+	// <-sysTrayQuit
 }

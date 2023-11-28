@@ -2,10 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	webSocket "github.com/gorilla/websocket"
 )
 
 type BasicLogData struct {
@@ -13,6 +15,14 @@ type BasicLogData struct {
 }
 
 var jwtSecret = []byte(globalConfig.JwtSecret)
+var upGrader = webSocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+	CheckOrigin: func(r *http.Request) bool {
+		return true // Allow any origin for WebSocket connections
+	},
+}
+
 var defaultAllowedUsers = map[string]string{
 	"shiv": "P@ssw0rd",
 }
@@ -76,7 +86,6 @@ func generateToken(userId string) (string, error) {
 	return tokenString, nil
 }
 
-// DefaultHandler handles GET requests on the default path ("/")
 func DefaultHandler(w http.ResponseWriter, r *http.Request) {
 	data := BasicLogData{
 		Message: "Lazy Panda running on port " + globalConfig.Server.Port,
@@ -95,7 +104,7 @@ func DefaultHandler(w http.ResponseWriter, r *http.Request) {
 
 func authenticateMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/api/login" || r.URL.Path == "/" {
+		if r.URL.Path == "/api/login" || r.URL.Path == "/" || r.URL.Path == "/ws" {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -117,4 +126,24 @@ func authenticateMiddleware(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
+}
+
+func wsHandler(w http.ResponseWriter, r *http.Request) {
+	httpToWsConnection, err := upGrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	defer httpToWsConnection.Close() //Closing the http connection
+
+	for {
+		messageType, message, err := httpToWsConnection.ReadMessage()
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		log.Println(string(message), messageType)
+
+		go mouseHandler(messageType, string(message), httpToWsConnection)
+	}
 }

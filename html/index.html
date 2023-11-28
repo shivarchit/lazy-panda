@@ -1,19 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lazy Panda</title>
+    <title>Mouse Movement Tracker</title>
 </head>
-<style>
-    body {
-        background-image: url(https://media.giphy.com/media/U3qYN8S0j3bpK/giphy.gif)
-    }
-</style>
-
 <body>
+    <script>
+        // Establish WebSocket connection
+        const socket = new WebSocket("ws://starfish-hopeful-spaniel.ngrok-free.app/ws");
 
+        // Handle mousemove events
+        document.addEventListener("mousemove", (event) => {
+            // Send mouse coordinates to the server
+            const coordinates = {
+                x: event.clientX,
+                y: event.clientY
+            };
+
+            socket.send(JSON.stringify(coordinates));
+        });
+
+        // Handle messages from the server (if needed)
+        socket.addEventListener("message", (event) => {
+            console.log("Message from server:", event.data);
+        });
+    </script>
 </body>
-
 </html>

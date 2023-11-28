@@ -1,12 +1,13 @@
 module server/listener
 
-go 1.21
+go 1.20
 
 require (
 	github.com/getlantern/systray v1.2.2
 	github.com/go-vgo/robotgo v0.110.0
 	github.com/golang-jwt/jwt/v5 v5.1.0
 	github.com/gorilla/mux v1.8.1
+	github.com/gorilla/websocket v1.5.1
 	golang.ngrok.com/ngrok v1.5.1
 )
 
@@ -46,7 +47,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.ngrok.com/muxado/v2 v2.0.0 // indirect
 	golang.org/x/image v0.12.0 // indirect
-	golang.org/x/net v0.15.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sync v0.4.0 // indirect
 	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/term v0.13.0 // indirect
