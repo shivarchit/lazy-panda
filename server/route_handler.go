@@ -79,7 +79,7 @@ func generateToken(userId string) (string, error) {
 // DefaultHandler handles GET requests on the default path ("/")
 func DefaultHandler(w http.ResponseWriter, r *http.Request) {
 	data := BasicLogData{
-		Message: "Lazy Panda running on port 3010!",
+		Message: "Lazy Panda running on port " + globalConfig.Server.Port,
 	}
 
 	jsonResponse, err := json.Marshal(data)

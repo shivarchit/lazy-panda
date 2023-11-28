@@ -9,7 +9,6 @@ import (
 	robotGo "github.com/go-vgo/robotgo"
 )
 
-// KeyboardEventHandler handles incoming keyboard events
 func KeyboardEventHandler(w http.ResponseWriter, r *http.Request) {
 	var event KeyboardEvent
 

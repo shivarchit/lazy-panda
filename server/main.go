@@ -8,7 +8,8 @@ import (
 
 	"github.com/gorilla/mux"
 	"golang.ngrok.com/ngrok"
-	"golang.ngrok.com/ngrok/config"
+
+	ngRokConfig "golang.ngrok.com/ngrok/config"
 )
 
 var keyPressChannel = make(chan string)
@@ -26,8 +27,8 @@ func main() {
 
 	ctx := context.Background()
 	listener, err := ngrok.Listen(ctx,
-		config.HTTPEndpoint(
-			config.WithDomain(globalConfig.Ngrok.Domain),
+		ngRokConfig.HTTPEndpoint(
+			ngRokConfig.WithDomain(globalConfig.Ngrok.Domain),
 		),
 		ngrok.WithAuthtoken(globalConfig.Ngrok.AuthToken),
 	)
