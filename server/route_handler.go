@@ -53,7 +53,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	if !ok || expectedPassword != creds.Password {
 		w.WriteHeader(http.StatusUnauthorized)
-		response := struct{ UnauthorizedAccess bool }{true}
+		response := struct {
+			WrongUserName bool
+			InvalidLogin  bool
+		}{true, true}
 		jsonResponse, err := json.Marshal(response)
 		if err != nil {
 			http.Error(w, "Failed to create JSON response", http.StatusInternalServerError)
@@ -67,8 +70,15 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-
-	w.Write([]byte(token))
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	jsonToken := struct{ Token string }{token}
+	marshalJsonToken, err := json.Marshal(jsonToken)
+	if err != nil {
+		http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
+		return
+	}
+	w.Write(marshalJsonToken)
 }
 
 func generateToken(userId string) (string, error) {
