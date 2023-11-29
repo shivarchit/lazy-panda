@@ -3,6 +3,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Implement your trackpad UI elements here -->
+    <ImageView
+        android:id="@+id/trackpadImage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitCenter"
+        android:src="@drawable/trackpad_image" />
 
 </RelativeLayout>

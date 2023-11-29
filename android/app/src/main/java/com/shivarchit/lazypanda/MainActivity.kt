@@ -1,19 +1,20 @@
 package com.shivarchit.lazypanda
 
+import android.app.Application
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import retrofit2.Retrofit
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import android.app.Application
 
-class MyApp : Application() {
+
+class RetroFitClassApp: Application() {
     companion object {
         lateinit var apiService: ApiService
         lateinit var token: String
@@ -36,7 +37,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+//        RetroFitClassApp.token
         val loginButton = findViewById<Button>(R.id.loginButton)
         loginButton.setOnClickListener {
             val usernameEditText = findViewById<EditText>(R.id.username)
@@ -64,18 +65,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loginUser(username: String, password: String) {
-        val call = MyApp.apiService.login(username, password)
+        val loginObjectMap: MutableMap<String, String> = HashMap()
+        loginObjectMap["username"] = username
+        loginObjectMap["password"] = password
+        val call = RetroFitClassApp.apiService.login(loginObjectMap)
         call.enqueue(object : Callback<ResponseModel> {
             override fun onResponse(call: Call<ResponseModel>, response: Response<ResponseModel>) {
                 if (response.isSuccessful) {
                     val responseBody = response.body()
-                    if (responseBody != null && responseBody.success) {
-                        responseBody.token?.let {
-                            MyApp.token = it
+                    if (responseBody != null && responseBody.Token != "") {
+                        responseBody.Token?.let {
+                            RetroFitClassApp.token = it
                             navigateToTrackpadView()
                         } ?: showToast("Token not found in the response.")
                     } else {
-                        showToast(responseBody?.message ?: "Login failed.")
+                        showToast("a" ?: "Login failed.")
                     }
                 } else {
                     showToast("Failed to make the login request.")
