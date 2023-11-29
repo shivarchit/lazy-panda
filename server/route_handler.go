@@ -54,9 +54,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if !ok || expectedPassword != creds.Password {
 		w.WriteHeader(http.StatusUnauthorized)
 		response := struct {
-			WrongUserName bool
-			InvalidLogin  bool
-		}{true, true}
+			InvalidLogin bool
+		}{true}
 		jsonResponse, err := json.Marshal(response)
 		if err != nil {
 			http.Error(w, "Failed to create JSON response", http.StatusInternalServerError)

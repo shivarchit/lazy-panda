@@ -9,7 +9,7 @@ import (
 	webSocket "github.com/gorilla/websocket"
 )
 
-type MyData struct {
+type JSONStruct struct {
 	X int `json:"x"`
 	Y int `json:"y"`
 }
@@ -17,13 +17,13 @@ type MyData struct {
 var mutex sync.Mutex
 
 func mouseHandler(messageType int, message string, wsConnection *webSocket.Conn) {
-	var jsonResponse MyData
+	var jsonResponse JSONStruct
 	mutex.Lock()
-	defer mutex.Unlock()
 	err := json.Unmarshal([]byte(message), &jsonResponse)
 	if err != nil {
 		log.Fatal(err)
+		defer mutex.Unlock()
 	}
-	log.Println(jsonResponse)
 	robotGo.MoveSmoothRelative(jsonResponse.X, jsonResponse.Y)
+	defer mutex.Unlock()
 }
