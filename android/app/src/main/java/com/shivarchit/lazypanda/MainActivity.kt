@@ -1,12 +1,14 @@
 package com.shivarchit.lazypanda
 
 import android.app.Application
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.room.Room
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -34,10 +36,26 @@ class RetroFitClassApp: Application() {
 
 class MainActivity : AppCompatActivity() {
 
+    object DatabaseProvider {
+        private var database: LazyPandaDatabase? = null
+
+        fun getDatabase(context: Context): LazyPandaDatabase {
+            return database ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    LazyPandaDatabase::class.java,
+                    "lazy_panda.db"
+                ).build()
+                database = instance
+                instance
+            }
+        }
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-//        RetroFitClassApp.token
         val loginButton = findViewById<Button>(R.id.loginButton)
         loginButton.setOnClickListener {
             val usernameEditText = findViewById<EditText>(R.id.username)
