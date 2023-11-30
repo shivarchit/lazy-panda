@@ -9,19 +9,12 @@ Lazy Panda 🐼
 Lazy Panda is a versatile Go-based HTTP and WebSocket server designed to transform your Android device into a powerful remote control for your PC. Say goodbye to the hassle of manual keyboard inputs and mouse movements – let Lazy Panda handle the virtual workload for you.
 
 Key Features:
-
-    Android Remote Control 📱: Harness the power of your Android device to remotely control your PC. Lazy Panda facilitates seamless communication between your smartphone and computer, allowing you to execute keyboard key presses and mouse movements effortlessly.
-
-    Effortless Virtual Work 🎮: Experience the convenience of virtual work with Lazy Panda. Execute keyboard commands, simulate mouse clicks, and navigate your PC's interface with ease, all from the comfort of your Android device.
-
-    Go-Based Server 💼: Built on the robust Go programming language, Lazy Panda ensures efficient and reliable communication between your Android client and PC server. Benefit from the speed and performance of Go for a smooth remote control experience.
-
-    Secure Communication 🔒: Rest easy knowing that Lazy Panda prioritizes the security of your remote control sessions. Utilize encrypted communication channels to safeguard your data and maintain privacy while controlling your PC.
-
-    Customizable Commands 🛠️: Tailor Lazy Panda to suit your specific needs. Define custom commands, shortcuts, and macros to streamline your remote control experience. The server adapts to your preferences, making it a truly personalized tool.
-
-    Real-Time Feedback 📊: Receive real-time feedback on your remote control actions. Lazy Panda keeps you informed about the status of keyboard inputs and mouse movements, ensuring a responsive and interactive connection between your Android device and PC.
-
+ 1: Android Remote Control 📱: Harness the power of your Android device to remotely control your PC. Lazy Panda facilitates seamless communication between your smartphone and computer, allowing you to execute keyboard key presses and mouse movements effortlessly
+ 2: Effortless Virtual Work 🎮: Experience the convenience of virtual work with Lazy Panda. Execute keyboard commands, simulate mouse clicks, and navigate your PC's interface with ease, all from the comfort of your Android device
+ 3: Go-Based Server 💼: Built on the robust Go programming language, Lazy Panda ensures efficient and reliable communication between your Android client and PC server. Benefit from the speed and performance of Go for a smooth remote control experience
+ 4: Secure Communication 🔒: Rest easy knowing that Lazy Panda prioritizes the security of your remote control sessions. Utilize encrypted communication channels to safeguard your data and maintain privacy while controlling your PC.
+ 5: Customizable Commands 🛠️: Tailor Lazy Panda to suit your specific needs. Define custom commands, shortcuts, and macros to streamline your remote control experience. The server adapts to your preferences, making it a truly personalized tool
+ 6: Real-Time Feedback 📊: Receive real-time feedback on your remote control actions. Lazy Panda keeps you informed about the status of keyboard inputs and mouse movements, ensuring a responsive and interactive connection between your Android device and PC.
 
 
 <h2>🍰 Contribution Guidelines:</h2>
