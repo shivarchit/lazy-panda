@@ -4,6 +4,7 @@
 
 <h2>
 Lazy Panda 🐼
+</h2>
 
 Lazy Panda is a versatile Go-based HTTP and WebSocket server designed to transform your Android device into a powerful remote control for your PC. Say goodbye to the hassle of manual keyboard inputs and mouse movements – let Lazy Panda handle the virtual workload for you.
 
@@ -20,7 +21,7 @@ Key Features:
     Customizable Commands 🛠️: Tailor Lazy Panda to suit your specific needs. Define custom commands, shortcuts, and macros to streamline your remote control experience. The server adapts to your preferences, making it a truly personalized tool.
 
     Real-Time Feedback 📊: Receive real-time feedback on your remote control actions. Lazy Panda keeps you informed about the status of keyboard inputs and mouse movements, ensuring a responsive and interactive connection between your Android device and PC.
-</h2>
+
 
 
 <h2>🍰 Contribution Guidelines:</h2>
